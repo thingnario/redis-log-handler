@@ -1,0 +1,4 @@
+*.pyc
+*.rdb
+*.mypy_cache/*
+*.egg-info/*
