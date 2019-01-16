@@ -1,0 +1,22 @@
+image: python:latest
+
+# Change pip's cache directory to be inside the project directory since we can
+# only cache local items.
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
+before_script:
+  - python -V               # Print out python version for debugging
+  - python3 -m venv venv
+  - source venv/bin/activate
+
+run:
+  script:
+    - pip install twine
+    - python setup.py sdist bdist_wheel
+    - twine upload dist/*
