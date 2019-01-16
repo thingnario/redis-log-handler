@@ -17,6 +17,6 @@ before_script:
 
 run:
   script:
-    - pip install twine
+    - pip install twine wheel
     - python setup.py sdist bdist_wheel
     - twine upload dist/*
