@@ -10,13 +10,33 @@ cache:
     - .cache/pip
     - venv/
 
+stages:
+  - test
+  - upload
+
 before_script:
   - python -V               # Print out python version for debugging
   - python3 -m venv venv
   - source venv/bin/activate
 
-run:
+pytest:
+  stage: test
+  script:
+    - pip install pytest pytest-cov
+    - pip install -e .
+    - pytest -s tests --cov redis_log_handler --cov-report term-missing --tb=native
+
+security:
+  stage: test
+  script:
+    - pip install safety
+    - pip install -e .
+    - safety check
+
+pypi:
+  stage: upload
   script:
     - pip install twine wheel
     - python setup.py sdist bdist_wheel
     - twine upload dist/*
+
