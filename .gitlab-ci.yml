@@ -10,6 +10,9 @@ cache:
     - .cache/pip
     - venv/
 
+services:
+  - redis
+
 stages:
   - test
   - upload
@@ -18,6 +21,11 @@ before_script:
   - python -V               # Print out python version for debugging
   - python3 -m venv venv
   - source venv/bin/activate
+
+connect:
+  image: redis
+  script:
+  - redis-cli -h redis PING
 
 pytest:
   stage: test
