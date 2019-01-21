@@ -23,6 +23,7 @@ before_script:
   - source venv/bin/activate
 
 connect:
+  stage: test
   image: redis
   script:
   - redis-cli -h redis PING
