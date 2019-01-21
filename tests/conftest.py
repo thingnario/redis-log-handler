@@ -7,10 +7,13 @@ from redis_log_handler.RedisLogHandler import RedisLogHandler
 
 @pytest.fixture
 def redis_client():
+    red = redis.Redis(host='localhost')
     try:
-        return redis.Redis(host='localhost')
+        red.ping()
     except redis.ConnectionError:
-        return redis.Redis(host='redis')
+        red = redis.Redis(host='redis')
+    finally:
+        return red
 
 
 class LogTestHelper(object):
