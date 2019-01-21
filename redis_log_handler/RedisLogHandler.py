@@ -6,15 +6,15 @@ import redis
 class RedisLogHandler(logging.StreamHandler):
     def __init__(
             self, channel: str, host: str = None, port: int = None,
-            password: str = None
+            password: str = None, redis_client: redis.Redis = None
     ):
         super().__init__()
 
         self.channel = channel
         self.host = host or 'localhost'
         self.port = port or 6379
-        self.password = password or None
-        self.redis_client = self._initialize_redis_connection()
+        self.password = password
+        self.redis_client = redis_client or self._initialize_redis_connection()
 
     def _initialize_redis_connection(self):
         return redis.Redis(

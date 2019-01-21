@@ -9,8 +9,18 @@ def test_redis_is_running_and_responding(redis_client: redis.Redis):
     assert redis_client.ping() is True
 
 
-def test_create_handler_for_existing_redis_connection():
-    RedisLogHandler('real')
+def test_create_handler_for_existing_redis_connection(
+        redis_client: redis.Redis, log_test_helper: LogTestHelper
+):
+    try:
+        handler_with_real_host = RedisLogHandler(
+            'channel', redis_client=redis_client
+        )
+        log_test_helper.generate_subscriber_on_channel(
+            handler_with_real_host.redis_client, handler_with_real_host.channel
+        )
+    except redis.ConnectionError:
+        pytest.fail('Handler could not be created for existing redis connection.')
 
 
 def test_create_handler_for_non_existing_redis_connection(
@@ -26,10 +36,10 @@ def test_create_handler_for_non_existing_redis_connection(
 def test_send_message_to_redis(
         redis_client: redis.Redis, log_test_helper: LogTestHelper
 ):
-    handler = RedisLogHandler('ch:test_channel')
+    handler = RedisLogHandler('ch:test_channel', redis_client=redis_client)
     logger = log_test_helper.generate_logger('logger', 'INFO', handler.channel)
     subscriber = log_test_helper.generate_subscriber_on_channel(
-        redis_client, handler.channel
+        handler.redis_client, handler.channel
     )
 
     message = subscriber.get_message(ignore_subscribe_messages=True, timeout=1)
