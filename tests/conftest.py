@@ -17,6 +17,11 @@ def redis_connection_pool():
     return redis.ConnectionPool(host=os.getenv('REDIS_HOST'))
 
 
+@pytest.fixture
+def redis_host():
+    return os.getenv('REDIS_HOST')
+
+
 class LogTestHelper(object):
     """Used to distribute helper methods through a fixture."""
     @staticmethod

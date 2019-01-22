@@ -9,8 +9,8 @@ def test_redis_is_running_and_responding(redis_client: redis.Redis):
     assert redis_client.ping() is True
 
 
-def test_create_handler_by_arguments():
-    handler = RedisLogHandler('ch:channel', host='localhost', port=6379)
+def test_create_handler_by_arguments(redis_host):
+    handler = RedisLogHandler('ch:channel', host=redis_host, port=6379)
     assert handler is not None
 
     try:
