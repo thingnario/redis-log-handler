@@ -1,7 +1,7 @@
 import redis
 import pytest
 
-from redis_log_handler.RedisLogHandler import RedisLogHandler
+from redis_log_handler.redis_log_handler import RedisLogHandler
 from conftest import LogTestHelper
 
 
@@ -9,12 +9,34 @@ def test_redis_is_running_and_responding(redis_client: redis.Redis):
     assert redis_client.ping() is True
 
 
+def test_create_handler_by_arguments():
+    handler = RedisLogHandler('ch:channel', host='localhost', port=6379)
+    assert handler is not None
+
+    try:
+        assert handler.redis_client.ping() is not None
+    except redis.ConnectionError:
+        pytest.fail('Creating handler by connection pool failed.')
+
+
+def test_create_handler_by_connection_pool(
+        redis_connection_pool: redis.ConnectionPool
+):
+    handler = RedisLogHandler('ch:channel', connection_pool=redis_connection_pool)
+    assert handler is not None
+
+    try:
+        assert handler.redis_client.ping() is not None
+    except redis.ConnectionError:
+        pytest.fail('Creating handler by connection pool failed.')
+
 def test_create_handler_for_existing_redis_connection(
-        redis_client: redis.Redis, log_test_helper: LogTestHelper
+        redis_connection_pool: redis.ConnectionPool,
+        log_test_helper: LogTestHelper
 ):
     try:
         handler_with_real_host = RedisLogHandler(
-            'channel', redis_client=redis_client
+            'channel', connection_pool=redis_connection_pool
         )
         log_test_helper.generate_subscriber_on_channel(
             handler_with_real_host.redis_client, handler_with_real_host.channel
@@ -33,10 +55,21 @@ def test_create_handler_for_non_existing_redis_connection(
         )
 
 
+def test_unique_channel_per_handler():
+    handler_one = RedisLogHandler('ch:channel_01')
+    handler_two = RedisLogHandler('ch:channel_02')
+    handler_three = RedisLogHandler('ch:channel_03')
+
+    assert handler_one.channel != handler_two.channel != handler_three.channel
+
+
 def test_send_message_to_redis(
-        redis_client: redis.Redis, log_test_helper: LogTestHelper
+        redis_connection_pool: redis.ConnectionPool,
+        log_test_helper: LogTestHelper
 ):
-    handler = RedisLogHandler('ch:test_channel', redis_client=redis_client)
+    handler = RedisLogHandler(
+        'ch:test_channel', connection_pool=redis_connection_pool
+    )
     logger = log_test_helper.generate_logger('logger', 'INFO', handler.channel)
     subscriber = log_test_helper.generate_subscriber_on_channel(
         handler.redis_client, handler.channel
@@ -52,14 +85,6 @@ def test_send_message_to_redis(
     assert 'Test logger' in message.get('data').decode('utf-8')
 
     log_test_helper.close_connection_to_channel(subscriber)
-
-
-def test_unique_channel_per_handler():
-    handler_one = RedisLogHandler('ch:channel_01')
-    handler_two = RedisLogHandler('ch:channel_02')
-    handler_three = RedisLogHandler('ch:channel_03')
-
-    assert handler_one.channel != handler_two.channel != handler_three.channel
 
 
 def test_unique_channel_publishing(
