@@ -4,6 +4,7 @@ image: python:latest
 # only cache local items.
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  REDIS_HOST: redis
 
 cache:
   paths:
@@ -21,6 +22,8 @@ before_script:
 
 pytest:
   stage: test
+  services:
+    - redis:4
   script:
     - pip install pytest pytest-cov
     - pip install -e .

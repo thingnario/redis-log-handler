@@ -1,13 +1,25 @@
-import pytest
+import os
 import logging
 
 import redis
-from redis_log_handler.RedisLogHandler import RedisLogHandler
+import pytest
+
+from redis_log_handler.redis_log_handler import RedisLogHandler
 
 
 @pytest.fixture
 def redis_client():
-    return redis.Redis(host='localhost', port=6379, password=None)
+    return redis.Redis(host=os.getenv('REDIS_HOST'))
+
+
+@pytest.fixture
+def redis_connection_pool():
+    return redis.ConnectionPool(host=os.getenv('REDIS_HOST'))
+
+
+@pytest.fixture
+def redis_host():
+    return os.getenv('REDIS_HOST')
 
 
 class LogTestHelper(object):
