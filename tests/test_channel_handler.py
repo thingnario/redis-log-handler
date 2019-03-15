@@ -85,7 +85,9 @@ def test_send_message_to_redis(redis_connection_pool: redis.ConnectionPool):
     close_connection_to_channel(subscriber)
 
 
-def test_unique_channel_publishing(redis_client: redis.StrictRedis):
+def test_unique_channel_publishing(
+    redis_client: redis.StrictRedis, redis_connection_pool: redis.ConnectionPool
+):
     channel_one = "ch:channel_01"
     channel_two = "ch:channel_02"
     channel_three = "ch:channel_03"
@@ -95,10 +97,14 @@ def test_unique_channel_publishing(redis_client: redis.StrictRedis):
     subscriber_three = generate_subscriber_on_channel(redis_client, channel_three)
 
     logger_one = generate_logger(
-        "first_logger", "INFO", RedisChannelHandler(channel_one)
+        "first_logger",
+        "INFO",
+        RedisChannelHandler(channel_one, connection_pool=redis_connection_pool),
     )
     logger_two = generate_logger(
-        "second_logger", "INFO", RedisChannelHandler(channel_two)
+        "second_logger",
+        "INFO",
+        RedisChannelHandler(channel_two, connection_pool=redis_connection_pool),
     )
 
     all_messages = (
