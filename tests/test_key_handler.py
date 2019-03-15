@@ -1,9 +1,7 @@
-import logging
-
 import pytest
 import redis
 
-from redis_log_handler.redis_log_handler import RedisKeyHandler
+from redis_log_handler import RedisKeyHandler
 from tests.helper_functions import generate_logger
 
 

@@ -1,7 +1,7 @@
 import redis
 import pytest
 
-from redis_log_handler.redis_log_handler import RedisChannelHandler
+from redis_log_handler import RedisChannelHandler
 from tests.helper_functions import (
     generate_subscriber_on_channel,
     generate_logger,

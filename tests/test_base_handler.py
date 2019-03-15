@@ -1,10 +1,9 @@
-import redis
-import pytest
-
+from typing import Any
 import logging
 
+import pytest
 
-from redis_log_handler.redis_log_handler import RedisBaseHandler
+from redis_log_handler import RedisBaseHandler
 from tests.helper_functions import generate_logger
 
 
@@ -17,14 +16,8 @@ def test_base_handler_without_emit_cannot_be_used():
 
 def test_base_handler_derivative_with_custom_emit(redis_host):
     class DerivativeHandler(RedisBaseHandler):
-        def __init__(
-            self,
-            host: str = None,
-            port: int = None,
-            password: str = None,
-            connection_pool: redis.ConnectionPool = None,
-        ):
-            super().__init__(host, port, password, connection_pool)
+        def __init__(self, **kwargs: Any):
+            super().__init__(**kwargs)
 
         def emit(self, message: logging.LogRecord):
             self.redis_client.set("DERIVATIVE_KEY", "DERIVATIVE_VALUE")

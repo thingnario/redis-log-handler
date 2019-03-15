@@ -2,7 +2,7 @@ import logging
 
 import redis
 
-from redis_log_handler.redis_log_handler import RedisBaseHandler
+from redis_log_handler import RedisBaseHandler
 
 
 def generate_logger(name: str, level: str, handler: RedisBaseHandler) -> logging.Logger:
