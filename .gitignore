@@ -2,3 +2,5 @@
 *.rdb
 *.mypy_cache/*
 *.egg-info/*
+*.idea/*
+*.eggs/*
