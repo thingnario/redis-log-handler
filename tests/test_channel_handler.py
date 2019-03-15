@@ -52,15 +52,21 @@ def test_create_handler_for_non_existing_redis_connection():
         )
 
 
-def test_unique_channel_per_handler(redis_host: str):
-    handler_one = RedisChannelHandler("ch:channel_01", host=redis_host)
-    handler_two = RedisChannelHandler("ch:channel_02", host=redis_host)
-    handler_three = RedisChannelHandler("ch:channel_03", host=redis_host)
+def test_unique_channel_per_handler(redis_connection_pool: redis.ConnectionPool):
+    handler_one = RedisChannelHandler(
+        "ch:channel_01", connection_pool=redis_connection_pool
+    )
+    handler_two = RedisChannelHandler(
+        "ch:channel_02", connection_pool=redis_connection_pool
+    )
+    handler_three = RedisChannelHandler(
+        "ch:channel_03", connection_pool=redis_connection_pool
+    )
 
     assert handler_one.channel != handler_two.channel != handler_three.channel
 
 
-def test_send_message_to_redis(redis_connection_pool: redis.ConnectionPool,):
+def test_send_message_to_redis(redis_connection_pool: redis.ConnectionPool):
     handler = RedisChannelHandler(
         "ch:test_channel", connection_pool=redis_connection_pool
     )
