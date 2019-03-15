@@ -2,7 +2,7 @@
 Handler for the standard `logging` module which puts logs through to Redis.
 
 ## How to use
-You can either publish your logs to a channel, `rpush` them onto a key with an optional `ttl`
+You can either publish your logs to a channel, `rpush` them onto a key with an optional `ttl`  
 or implement the desired behaviour by deriving from the base class.
 
 To add a handler to the python logger is very simple:
@@ -23,8 +23,8 @@ logger.warning("This will rpush this message to the 'example_key' in Redis.")
 ```
 
 ### Configuring Redis Connection
-By default each handler will create a `StrictRedis` instance, passing on each argument from their `__init(**kwargs)` to the StrictRedis instantiation.
-This means you can configure the connection as specific as you'd like, but every argument needs to have its keyword (`(host=localhost)` instead of `(localhost)`.
+By default each handler will create a `StrictRedis` instance, passing on each argument from their `__init__(**kwargs)` to the StrictRedis instantiation.
+This means you can configure the connection as specific as you'd like, but every argument should be provided with its keyword; `Handler(host=localhost)` instead of `Handler(localhost)`.
 All available configuration options are available in te [python-redis documentation](https://redis-py.readthedocs.io/en/latest/).
 
 ```python
