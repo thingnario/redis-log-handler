@@ -35,7 +35,6 @@ def test_create_handler_for_existing_redis_connection(
         handler_with_real_host.redis_client.set(
             "some_test_key", "some_test_value", ex=1
         )
-        handler_with_real_host.redis_client.delete("some_test_key")
     except redis.ConnectionError:
         pytest.fail("Handler could not be created for existing redis connection.")
 
@@ -46,7 +45,6 @@ def test_create_handler_for_non_existing_redis_connection():
         handler_with_fake_host.redis_client.set(
             "some_test_key", "some_test_value", ex=1
         )
-        handler_with_fake_host.redis_client.delete("some_test_key")
 
 
 def test_send_message_to_redis(redis_connection_pool: redis.ConnectionPool,):
@@ -62,7 +60,38 @@ def test_send_message_to_redis(redis_connection_pool: redis.ConnectionPool,):
     assert message is not None
     assert len(message) > 0
 
-    handler.redis_client.delete("some_test_key")
+
+def test_read_pure_message(redis_connection_pool: redis.ConnectionPool,):
+    handler = RedisKeyHandler("some_test_key", connection_pool=redis_connection_pool)
+    logger = generate_logger("logger", "INFO", handler)
+
+    message = handler.redis_client.lrange("some_test_key", 0, -1)
+    assert len(message) is 0
+
+    logger.info("Test logger")
+
+    message = handler.redis_client.lrange("some_test_key", 0, -1)
+    assert message is not None
+    assert len(message) > 0
+    assert message[0] == b"Test logger"
+
+
+def test_read_raw_message(redis_connection_pool: redis.ConnectionPool,):
+    handler = RedisKeyHandler(
+        "another_test_key", raw_logging=True, connection_pool=redis_connection_pool
+    )
+    logger = generate_logger("another_logger", "INFO", handler)
+
+    message = handler.redis_client.lrange("another_test_key", 0, -1)
+    assert len(message) is 0
+
+    logger.info("Test logger")
+
+    message = handler.redis_client.lrange("another_test_key", 0, -1)
+    assert message is not None
+    assert len(message) > 0
+    assert message[0] != b"Test logger"
+    assert b"Test logger" in message[0]
 
 
 def test_logging_sends_messages(redis_connection_pool: redis.ConnectionPool):
@@ -77,5 +106,3 @@ def test_logging_sends_messages(redis_connection_pool: redis.ConnectionPool):
     message = handler.redis_client.lrange("test_key", 0, -1)
     assert len(message) is 1
     assert b"This is a tester message" in message.pop()
-
-    handler.redis_client.delete("test_key")

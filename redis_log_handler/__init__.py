@@ -5,8 +5,9 @@ from redis import StrictRedis
 
 
 class RedisBaseHandler(logging.StreamHandler):
-    def __init__(self, **kwargs: Any):
+    def __init__(self, raw_logging: bool = False, **kwargs: Any):
         super().__init__()
+        self.raw_logging = raw_logging
         self.redis_client = StrictRedis(**kwargs)
 
     def emit(self, message: logging.LogRecord):
@@ -20,7 +21,11 @@ class RedisChannelHandler(RedisBaseHandler):
         self.channel = channel
 
     def emit(self, message: logging.LogRecord):
-        self.redis_client.publish(self.channel, str(message))
+        content = str(message.msg)
+        if self.raw_logging:
+            content += f"{message.lineno} - {message.pathname}"
+
+        self.redis_client.publish(self.channel, content)
 
 
 class RedisKeyHandler(RedisBaseHandler):
@@ -34,4 +39,8 @@ class RedisKeyHandler(RedisBaseHandler):
             self.redis_client.expire(self.key, self.ttl)
 
     def emit(self, message: logging.LogRecord):
-        self.redis_client.rpush(self.key, str(message))
+        content = str(message.msg)
+        if self.raw_logging:
+            content += f" - {message.lineno}: {message.pathname}"
+
+        self.redis_client.rpush(self.key, content)

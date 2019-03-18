@@ -1,8 +1,20 @@
 # redis_log_handler
 Handler for the standard `logging` module which puts logs through to Redis.
 
+## Install
+This was developed against Python 3.6.7 specifically, but I don't believe it's version breaking.
+
+#### Development
+Set the local environment variable `REDIS_HOST` to point to the host where your Redis runs.
+
+        $ export REDIS_HOST=localhost
+
+Install the dev requirements
+
+        $ pip install -r requirements-dev.txt
+
 ## How to use
-You can either publish your logs to a channel, `rpush` them onto a key with an optional `ttl`  
+You can either publish your logs to a channel, `rpush` them onto a key with an optional `ttl`
 or implement the desired behaviour by deriving from the base class.
 
 To add a handler to the python logger is very simple:
@@ -34,9 +46,24 @@ connection_pool = redis.ConnectionPool(host="localhost")
 handler = RedisKeyHandler("key", connection_pool=connection_pool)
 ```
 
+### Configure message logging
+Every handler has the `raw_logging` option which can be provided optionally.
+Omitting it from the initialisation, will default it to `False`, meaning the message being logged will be purely what's sent.
+If you set it to `True`, first the content will be logged, then appended to the line number and finally the pathname.
+
+```python
+pure_handler = RedisKeyHandler("key_name")
+raw_handler = RedisKeyHandler("other_key_name", raw_logging=True)
+...
+logging.info("Test message")
+```
+The `pure_handler` would emit a message like so: `Test message.`,
+the `raw_handler` would emit a message like so: `Test message. - 2: /.../file.py`.
+
 ### 1. RedisChannelHandler
 This opens a connection to a redis channel, allowing subscribers to pickup new messages in realtime.
 Every message triggered by the logging instance, will get published to the specified channel.
+
 ```python
 handler = RedisChannelHandler("channelname")
 ```

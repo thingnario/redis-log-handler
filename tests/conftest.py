@@ -17,3 +17,11 @@ def redis_connection_pool():
 @pytest.fixture
 def redis_host():
     return os.getenv("REDIS_HOST")
+
+
+@pytest.fixture(autouse=True)
+def clean_redis_test_keys():
+    yield
+    redis = StrictRedis(host=os.getenv("REDIS_HOST"))
+    for key in redis.keys("*test*"):
+        redis.delete(key)
