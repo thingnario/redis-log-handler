@@ -23,7 +23,7 @@ class RedisChannelHandler(RedisBaseHandler):
     def emit(self, message: logging.LogRecord):
         content = str(message.msg)
         if self.raw_logging:
-            content += f"{message.lineno} - {message.pathname}"
+            content += "{} - {}".format(message.lineno, message.pathname)
 
         self.redis_client.publish(self.channel, content)
 
@@ -41,6 +41,6 @@ class RedisKeyHandler(RedisBaseHandler):
     def emit(self, message: logging.LogRecord):
         content = str(message.msg)
         if self.raw_logging:
-            content += f" - {message.lineno}: {message.pathname}"
+            content += "{} - {}".format(message.lineno, message.pathname)
 
         self.redis_client.rpush(self.key, content)
