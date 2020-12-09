@@ -21,7 +21,9 @@ class RedisChannelHandler(RedisBaseHandler):
         self.channel = channel
 
     def emit(self, message: logging.LogRecord):
-        content = str(message.msg)
+        content = self.format(message)
+        if not isinstance(content, str):
+            content = content.decode('utf8')
         if self.raw_logging:
             content += "{} - {}".format(message.lineno, message.pathname)
 
@@ -39,7 +41,9 @@ class RedisKeyHandler(RedisBaseHandler):
             self.redis_client.expire(self.key, self.ttl)
 
     def emit(self, message: logging.LogRecord):
-        content = str(message.msg)
+        content = self.format(message)
+        if not isinstance(content, str):
+            content = content.decode('utf8')
         if self.raw_logging:
             content += "{} - {}".format(message.lineno, message.pathname)
 
